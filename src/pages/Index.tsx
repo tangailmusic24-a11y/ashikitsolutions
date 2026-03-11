@@ -186,11 +186,85 @@ const ContactSection: React.FC = () => {
   );
 };
 
+const ShopPreview: React.FC = () => {
+  const { t, language } = useLanguage();
+  const { shopItems } = useData();
+
+  if (shopItems.length === 0) return null;
+
+  return (
+    <section className="py-12 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
+            <ShoppingBag className="w-6 h-6 text-primary" /> {t('শপ', 'Shop')}
+          </h2>
+          <p className="text-muted-foreground mt-2">{t('আমাদের জনপ্রিয় আইটেম', 'Our popular items')}</p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {shopItems.filter(i => i.inStock).slice(0, 3).map(item => (
+            <div key={item.id} className="card-3d p-5">
+              <div className="w-full h-24 rounded-lg bg-muted flex items-center justify-center mb-3">
+                <ShoppingBag className="w-10 h-10 text-muted-foreground/30" />
+              </div>
+              <h3 className="font-bold text-foreground">{language === 'bn' ? item.nameBn : item.nameEn}</h3>
+              <p className="text-sm text-muted-foreground mt-1">{language === 'bn' ? item.descriptionBn : item.descriptionEn}</p>
+              <p className="text-xl font-bold text-primary mt-2">৳{item.price}</p>
+            </div>
+          ))}
+        </div>
+        <div className="text-center mt-4">
+          <Link to="/shop" className="inline-flex items-center gap-1 text-primary text-sm font-medium hover:underline">
+            {t('সকল আইটেম দেখুন', 'View all items')} <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const SocialServicesPreview: React.FC = () => {
+  const { t, language } = useLanguage();
+  const { socialServices } = useData();
+  const platforms = Array.from(new Set(socialServices.map(s => s.platform)));
+
+  return (
+    <section className="py-12 px-4 bg-muted/50">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl font-bold text-foreground">🚀 {t('সোশ্যাল মিডিয়া সার্ভিস', 'Social Media Services')}</h2>
+          <p className="text-muted-foreground mt-2">{t('লাইক, ফলোয়ার, সাবস্ক্রাইবার এবং আরো', 'Likes, followers, subscribers and more')}</p>
+        </div>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {socialServices.slice(0, 6).map(svc => (
+            <div key={svc.id} className="card-3d p-4 flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg gradient-primary flex items-center justify-center shrink-0">
+                <Zap className="w-5 h-5 text-primary-foreground" />
+              </div>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-foreground text-sm truncate">{language === 'bn' ? svc.nameBn : svc.nameEn}</h3>
+                <p className="text-xs text-muted-foreground">৳{svc.price}/{svc.unit} • {svc.platform}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="text-center mt-4">
+          <Link to="/social-services" className="inline-flex items-center gap-1 text-primary text-sm font-medium hover:underline">
+            {t('সকল সার্ভিস দেখুন', 'View all services')} <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const HomePage: React.FC = () => {
   return (
     <Layout>
       <HeroSection />
       <NoticeBoard />
+      <ShopPreview />
+      <SocialServicesPreview />
       <PackagesPreview />
       <FeaturesSection />
       <ContactSection />
