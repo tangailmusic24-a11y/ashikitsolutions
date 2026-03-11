@@ -11,6 +11,8 @@ const AdminPage: React.FC = () => {
   const { user, isAdmin } = useAuth();
   const { packages, notices, transactions, addPackage, updatePackage, deletePackage, addNotice, updateNotice, deleteNotice, updateTransactionStatus } = useData();
   const [tab, setTab] = useState<'packages' | 'notices' | 'transactions' | 'users'>('packages');
+  const [newPkg, setNewPkg] = useState({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0 });
+  const [newNotice, setNewNotice] = useState({ titleBn: '', titleEn: '', contentBn: '', contentEn: '' });
 
   if (!user || !isAdmin) return <Navigate to="/login" />;
 
@@ -20,10 +22,6 @@ const AdminPage: React.FC = () => {
     { key: 'transactions' as const, icon: CreditCard, labelBn: 'পেমেন্ট', labelEn: 'Payments' },
     { key: 'users' as const, icon: Users, labelBn: 'ইউজার', labelEn: 'Users' },
   ];
-
-  // Simple forms inline
-  const [newPkg, setNewPkg] = useState({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0 });
-  const [newNotice, setNewNotice] = useState({ titleBn: '', titleEn: '', contentBn: '', contentEn: '' });
 
   const handleAddPkg = () => {
     if (!newPkg.nameEn) return;
