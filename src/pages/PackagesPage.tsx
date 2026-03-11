@@ -16,12 +16,12 @@ const PackagesPage: React.FC = () => {
   const [method, setMethod] = useState('bkash');
   const [success, setSuccess] = useState(false);
 
-  const handlePurchase = (e: React.FormEvent) => {
+  const handlePurchase = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !selectedPkg || !txId || !txMobile) return;
     const pkg = packages.find(p => p.id === selectedPkg);
     if (!pkg) return;
-    addTransaction({
+    await addTransaction({
       userId: user.id,
       userName: user.fullName,
       packageId: pkg.id,

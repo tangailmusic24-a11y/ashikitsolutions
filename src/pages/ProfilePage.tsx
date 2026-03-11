@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Navigate } from 'react-router-dom';
@@ -8,11 +8,14 @@ import { User, Mail, Phone, MapPin, CreditCard, Camera } from 'lucide-react';
 const ProfilePage: React.FC = () => {
   const { t } = useLanguage();
   const { user, updateProfile } = useAuth();
+  const [saving, setSaving] = useState(false);
 
   if (!user) return <Navigate to="/login" />;
 
-  const handleChange = (field: string, value: string) => {
-    updateProfile({ [field]: value });
+  const handleChange = async (field: string, value: string) => {
+    setSaving(true);
+    await updateProfile({ [field]: value });
+    setSaving(false);
   };
 
   const fields = [
@@ -32,12 +35,12 @@ const ProfilePage: React.FC = () => {
           <div className="h-32 gradient-hero relative">
             <div className="absolute -bottom-10 left-6">
               <div className="w-20 h-20 rounded-full bg-primary border-4 border-card flex items-center justify-center text-primary-foreground text-2xl font-bold">
-                {user.fullName.charAt(0).toUpperCase()}
+                {(user.fullName || user.username).charAt(0).toUpperCase()}
               </div>
             </div>
           </div>
           <div className="pt-14 pb-4 px-6">
-            <h2 className="text-lg font-bold text-foreground">{user.fullName}</h2>
+            <h2 className="text-lg font-bold text-foreground">{user.fullName || user.username}</h2>
             <p className="text-sm text-muted-foreground">@{user.username}</p>
           </div>
         </div>
