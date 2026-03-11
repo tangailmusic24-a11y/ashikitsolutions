@@ -15,6 +15,8 @@ const Header: React.FC = () => {
   const navItems = [
     { path: '/', icon: Home, labelBn: 'হোম', labelEn: 'Home' },
     { path: '/packages', icon: Package, labelBn: 'প্যাকেজ', labelEn: 'Packages' },
+    { path: '/shop', icon: ShoppingBag, labelBn: 'শপ', labelEn: 'Shop' },
+    { path: '/social-services', icon: Zap, labelBn: 'সোশ্যাল সার্ভিস', labelEn: 'Social Services' },
     { path: '/tools', icon: Wrench, labelBn: 'ফ্রি টুলস', labelEn: 'Free Tools' },
     { path: '/notices', icon: Bell, labelBn: 'নোটিশ বোর্ড', labelEn: 'Notices' },
   ];
