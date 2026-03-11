@@ -63,7 +63,7 @@ const Header: React.FC = () => {
 
             {user ? (
               <Link to="/profile" className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
-                {user.fullName.charAt(0).toUpperCase()}
+                {(user.fullName || user.username || '?').charAt(0).toUpperCase()}
               </Link>
             ) : (
               <Link to="/login" className="flex items-center gap-1 px-3 py-1.5 rounded-lg gradient-primary text-primary-foreground text-xs font-medium">
