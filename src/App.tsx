@@ -13,6 +13,8 @@ import ProfilePage from "./pages/ProfilePage";
 import PackagesPage from "./pages/PackagesPage";
 import NoticesPage from "./pages/NoticesPage";
 import ToolsPage from "./pages/ToolsPage";
+import ShopPage from "./pages/ShopPage";
+import SocialServicesPage from "./pages/SocialServicesPage";
 import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
@@ -35,6 +37,8 @@ const App = () => (
                   <Route path="/packages" element={<PackagesPage />} />
                   <Route path="/notices" element={<NoticesPage />} />
                   <Route path="/tools" element={<ToolsPage />} />
+                  <Route path="/shop" element={<ShopPage />} />
+                  <Route path="/social-services" element={<SocialServicesPage />} />
                   <Route path="/admin" element={<AdminPage />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
