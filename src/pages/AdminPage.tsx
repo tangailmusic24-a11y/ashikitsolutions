@@ -8,7 +8,7 @@ import { Package as PkgIcon, Bell, Users, CreditCard, Plus, Trash2, Check, X, Sh
 
 const AdminPage: React.FC = () => {
   const { t, language } = useLanguage();
-  const { user, isAdmin } = useAuth();
+  const { user, isAdmin, allProfiles, refreshProfiles } = useAuth();
   const {
     packages, notices, transactions, shopItems, socialServices,
     addPackage, deletePackage, addNotice, deleteNotice,
@@ -32,10 +32,10 @@ const AdminPage: React.FC = () => {
     { key: 'users', icon: Users, labelBn: 'ইউজার', labelEn: 'Users' },
   ];
 
-  const handleAddPkg = () => { if (!newPkg.nameEn) return; addPackage({ ...newPkg, features: [], featuresBn: [] }); setNewPkg({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0 }); };
-  const handleAddNotice = () => { if (!newNotice.titleEn) return; addNotice({ ...newNotice, date: new Date().toISOString(), important: false }); setNewNotice({ titleBn: '', titleEn: '', contentBn: '', contentEn: '' }); };
-  const handleAddShop = () => { if (!newShop.nameEn) return; addShopItem(newShop); setNewShop({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, category: 'service', image: '', inStock: true }); };
-  const handleAddSvc = () => { if (!newSvc.nameEn) return; addSocialService(newSvc); setNewSvc({ platform: 'facebook', serviceType: 'likes', nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, minQuantity: 100, maxQuantity: 10000, unit: 'likes' }); };
+  const handleAddPkg = async () => { if (!newPkg.nameEn) return; await addPackage({ ...newPkg, features: [], featuresBn: [] }); setNewPkg({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0 }); };
+  const handleAddNotice = async () => { if (!newNotice.titleEn) return; await addNotice({ ...newNotice, date: new Date().toISOString(), important: false }); setNewNotice({ titleBn: '', titleEn: '', contentBn: '', contentEn: '' }); };
+  const handleAddShop = async () => { if (!newShop.nameEn) return; await addShopItem(newShop); setNewShop({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, category: 'service', image: '', inStock: true }); };
+  const handleAddSvc = async () => { if (!newSvc.nameEn) return; await addSocialService(newSvc); setNewSvc({ platform: 'facebook', serviceType: 'likes', nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, minQuantity: 100, maxQuantity: 10000, unit: 'likes' }); };
 
   const inputCls = "px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm";
 
@@ -46,7 +46,7 @@ const AdminPage: React.FC = () => {
 
         <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
           {tabs.map(tb => (
-            <button key={tb.key} onClick={() => setTab(tb.key)}
+            <button key={tb.key} onClick={() => { setTab(tb.key); if (tb.key === 'users') refreshProfiles(); }}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-all ${tab === tb.key ? 'gradient-primary text-primary-foreground' : 'bg-muted text-foreground hover:bg-muted/80'}`}>
               <tb.icon className="w-4 h-4" /> {t(tb.labelBn, tb.labelEn)}
             </button>
@@ -184,18 +184,14 @@ const AdminPage: React.FC = () => {
         {/* Users */}
         {tab === 'users' && (
           <div className="space-y-3">
-            {(() => {
-              try {
-                const users = JSON.parse(localStorage.getItem('ashik-users') || '[]');
-                return users.filter((u: any) => !u.user.isAdmin).map((u: any) => (
-                  <div key={u.user.id} className="card-3d p-4">
-                    <h4 className="font-semibold text-foreground">{u.user.fullName}</h4>
-                    <p className="text-sm text-muted-foreground">@{u.user.username} • {u.user.email}</p>
-                    {u.user.mobile && <p className="text-xs text-muted-foreground">{u.user.mobile}</p>}
-                  </div>
-                ));
-              } catch { return <p className="text-muted-foreground">{t('কোনো ইউজার নেই', 'No users')}</p>; }
-            })()}
+            {allProfiles.length === 0 && <p className="text-center text-muted-foreground py-10">{t('কোনো ইউজার নেই', 'No users')}</p>}
+            {allProfiles.map(u => (
+              <div key={u.id} className="card-3d p-4">
+                <h4 className="font-semibold text-foreground">{u.fullName || u.username}</h4>
+                <p className="text-sm text-muted-foreground">@{u.username} • {u.email}</p>
+                {u.mobile && <p className="text-xs text-muted-foreground">{u.mobile}</p>}
+              </div>
+            ))}
           </div>
         )}
       </div>
