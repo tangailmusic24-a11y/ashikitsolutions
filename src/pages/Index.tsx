@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Facebook, Youtube, MessageCircle, Instagram, Zap, Shield, Clock, Send, Mail, Phone, Globe } from 'lucide-react';
+import { ArrowRight, Facebook, Youtube, MessageCircle, Instagram, Zap, Shield, Clock, Send, Mail, Phone, Globe, ShoppingBag } from 'lucide-react';
 import Layout from '@/components/Layout';
 
 const HeroSection: React.FC = () => {
