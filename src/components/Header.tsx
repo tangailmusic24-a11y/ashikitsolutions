@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Sun, Moon, Globe, Home, Package, Wrench, User, Shield, LogOut, LogIn, Bell } from 'lucide-react';
+import { Menu, X, Sun, Moon, Globe, Home, Package, Wrench, User, Shield, LogOut, LogIn, Bell, ShoppingBag, Zap } from 'lucide-react';
 
 const Header: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
