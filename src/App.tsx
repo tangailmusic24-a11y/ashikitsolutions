@@ -13,6 +13,8 @@ import ProfilePage from "./pages/ProfilePage";
 import PackagesPage from "./pages/PackagesPage";
 import NoticesPage from "./pages/NoticesPage";
 import ToolsPage from "./pages/ToolsPage";
+import ShopPage from "./pages/ShopPage";
+import SocialServicesPage from "./pages/SocialServicesPage";
 import AdminPage from "./pages/AdminPage";
 import NotFound from "./pages/NotFound";
 
