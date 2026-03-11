@@ -36,10 +36,10 @@ const SocialServicesPage: React.FC = () => {
 
   const paymentNumbers: Record<string, string> = { bkash: '01688230246', nagad: '01303216921', rocket: '013032169215' };
 
-  const handleOrder = (e: React.FormEvent) => {
+  const handleOrder = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !activeSvc || !txId || !txMobile) return;
-    addTransaction({
+    await addTransaction({
       userId: user.id, userName: user.fullName, packageId: activeSvc.id,
       packageName: `${language === 'bn' ? activeSvc.nameBn : activeSvc.nameEn} (${quantity} ${activeSvc.unit})`,
       amount: totalPrice, method, transactionId: txId, mobile: txMobile,

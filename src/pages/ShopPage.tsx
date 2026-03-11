@@ -18,12 +18,12 @@ const ShopPage: React.FC = () => {
 
   const paymentNumbers: Record<string, string> = { bkash: '01688230246', nagad: '01303216921', rocket: '013032169215' };
 
-  const handlePurchase = (e: React.FormEvent) => {
+  const handlePurchase = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !selectedItem || !txId || !txMobile) return;
     const item = shopItems.find(i => i.id === selectedItem);
     if (!item) return;
-    addTransaction({
+    await addTransaction({
       userId: user.id, userName: user.fullName, packageId: item.id,
       packageName: language === 'bn' ? item.nameBn : item.nameEn,
       amount: item.price, method, transactionId: txId, mobile: txMobile,
