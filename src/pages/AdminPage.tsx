@@ -21,6 +21,8 @@ const AdminPage: React.FC = () => {
   const [newPkg, setNewPkg] = useState({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0 });
   const [newNotice, setNewNotice] = useState({ titleBn: '', titleEn: '', contentBn: '', contentEn: '' });
   const [newShop, setNewShop] = useState({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, category: 'service', image: '', inStock: true });
+  const [uploadingShopImg, setUploadingShopImg] = useState(false);
+  const shopImgRef = useRef<HTMLInputElement>(null);
   const [newSvc, setNewSvc] = useState({ platform: 'facebook', serviceType: 'likes', nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, minQuantity: 100, maxQuantity: 10000, unit: 'likes' });
 
   if (!user || !isAdmin) return <Navigate to="/login" />;
