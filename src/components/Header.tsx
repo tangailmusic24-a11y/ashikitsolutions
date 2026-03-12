@@ -4,6 +4,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Sun, Moon, Globe, Home, Package, Wrench, User, Shield, LogOut, LogIn, Bell, ShoppingBag, Zap } from 'lucide-react';
+import logoImg from '@/assets/logo.jpg';
 
 const Header: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
@@ -80,17 +81,20 @@ const Header: React.FC = () => {
         <div className="fixed inset-0 z-50 flex">
           <div className="fixed inset-0 bg-foreground/30 backdrop-blur-sm" onClick={() => setSidebarOpen(false)} />
           <div className="relative w-72 max-w-[80vw] bg-card border-r border-border h-full flex flex-col animate-in slide-in-from-left duration-300">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <div className="flex items-center gap-2">
-                <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-primary-foreground font-bold">
-                  AIT
-                </div>
+            <div className="flex items-center justify-between p-4 border-b border-border relative overflow-hidden">
+              {/* Logo background */}
+              <div className="absolute inset-0">
+                <img src={logoImg} alt="" className="w-full h-full object-cover opacity-20" />
+                <div className="absolute inset-0 bg-gradient-to-b from-card/60 to-card/90" />
+              </div>
+              <div className="relative flex items-center gap-2">
+                <img src={logoImg} alt="Ashik IT Solutions" className="w-12 h-12 rounded-full object-cover border-2 border-primary shadow-lg" />
                 <div>
                   <h2 className="font-bold text-sm text-foreground">Ashik IT Solutions</h2>
                   <p className="text-xs text-muted-foreground">{t('বিশ্বস্ততার এক ধাপ এগিয়ে', 'One step ahead in trust')}</p>
                 </div>
               </div>
-              <button onClick={() => setSidebarOpen(false)} className="p-1.5 rounded-lg hover:bg-muted">
+              <button onClick={() => setSidebarOpen(false)} className="relative p-1.5 rounded-lg hover:bg-muted">
                 <X className="w-5 h-5 text-foreground" />
               </button>
             </div>
