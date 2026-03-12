@@ -39,6 +39,20 @@ const AdminPage: React.FC = () => {
   const handleAddPkg = async () => { if (!newPkg.nameEn) return; await addPackage({ ...newPkg, features: [], featuresBn: [] }); setNewPkg({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0 }); };
   const handleAddNotice = async () => { if (!newNotice.titleEn) return; await addNotice({ ...newNotice, date: new Date().toISOString(), important: false }); setNewNotice({ titleBn: '', titleEn: '', contentBn: '', contentEn: '' }); };
   const handleAddShop = async () => { if (!newShop.nameEn) return; await addShopItem(newShop); setNewShop({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, category: 'service', image: '', inStock: true }); };
+
+  const handleShopImageUpload = async (file: File) => {
+    if (!file || file.size > 5 * 1024 * 1024) { toast.error('File must be under 5MB'); return; }
+    if (!file.type.startsWith('image/')) { toast.error('Only images allowed'); return; }
+    setUploadingShopImg(true);
+    const ext = file.name.split('.').pop();
+    const filePath = `shop/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('user-uploads').upload(filePath, file, { upsert: true });
+    if (error) { toast.error('Upload failed'); setUploadingShopImg(false); return; }
+    const { data: urlData } = supabase.storage.from('user-uploads').getPublicUrl(filePath);
+    setNewShop(prev => ({ ...prev, image: urlData.publicUrl }));
+    setUploadingShopImg(false);
+    toast.success(t('ছবি আপলোড হয়েছে', 'Image uploaded'));
+  };
   const handleAddSvc = async () => { if (!newSvc.nameEn) return; await addSocialService(newSvc); setNewSvc({ platform: 'facebook', serviceType: 'likes', nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, minQuantity: 100, maxQuantity: 10000, unit: 'likes' }); };
 
   const inputCls = "px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm";
