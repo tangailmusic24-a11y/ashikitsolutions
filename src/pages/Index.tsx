@@ -191,6 +191,7 @@ const ShopPreview: React.FC = () => {
   const { shopItems } = useData();
 
   if (shopItems.length === 0) return null;
+  const items = shopItems.filter(i => i.inStock).slice(0, 8);
 
   return (
     <section className="py-12 px-4">
@@ -201,15 +202,19 @@ const ShopPreview: React.FC = () => {
           </h2>
           <p className="text-muted-foreground mt-2">{t('আমাদের জনপ্রিয় আইটেম', 'Our popular items')}</p>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {shopItems.filter(i => i.inStock).slice(0, 3).map(item => (
-            <div key={item.id} className="card-3d p-5">
-              <div className="w-full h-24 rounded-lg bg-muted flex items-center justify-center mb-3">
-                <ShoppingBag className="w-10 h-10 text-muted-foreground/30" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          {items.map(item => (
+            <div key={item.id} className="card-3d p-3 flex flex-col">
+              <div className="w-full aspect-square rounded-lg bg-muted flex items-center justify-center mb-2 overflow-hidden">
+                {item.image ? (
+                  <img src={item.image} alt={language === 'bn' ? item.nameBn : item.nameEn} className="w-full h-full object-cover" />
+                ) : (
+                  <ShoppingBag className="w-8 h-8 text-muted-foreground/30" />
+                )}
               </div>
-              <h3 className="font-bold text-foreground">{language === 'bn' ? item.nameBn : item.nameEn}</h3>
-              <p className="text-sm text-muted-foreground mt-1">{language === 'bn' ? item.descriptionBn : item.descriptionEn}</p>
-              <p className="text-xl font-bold text-primary mt-2">৳{item.price}</p>
+              <h3 className="text-sm font-bold text-foreground line-clamp-2 leading-tight">{language === 'bn' ? item.nameBn : item.nameEn}</h3>
+              <p className="text-xs text-muted-foreground mt-1 flex-1 line-clamp-2">{language === 'bn' ? item.descriptionBn : item.descriptionEn}</p>
+              <p className="text-lg font-bold text-primary mt-2">৳{item.price}</p>
             </div>
           ))}
         </div>
