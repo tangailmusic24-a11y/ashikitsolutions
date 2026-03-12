@@ -4,6 +4,7 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, Sun, Moon, Globe, Home, Package, Wrench, User, Shield, LogOut, LogIn, Bell, ShoppingBag, Zap } from 'lucide-react';
+import logoImg from '@/assets/logo.jpg';
 
 const Header: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
