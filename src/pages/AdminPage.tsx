@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 import { Navigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { Package as PkgIcon, Bell, Users, CreditCard, Plus, Trash2, Check, X, ShoppingBag, Zap } from 'lucide-react';
+import { Package as PkgIcon, Bell, Users, CreditCard, Plus, Trash2, Check, X, ShoppingBag, Zap, Upload, Image } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const AdminPage: React.FC = () => {
   const { t, language } = useLanguage();
