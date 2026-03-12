@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
 import { Navigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { Package as PkgIcon, Bell, Users, CreditCard, Plus, Trash2, Check, X, ShoppingBag, Zap } from 'lucide-react';
+import { Package as PkgIcon, Bell, Users, CreditCard, Plus, Trash2, Check, X, ShoppingBag, Zap, Upload, Image } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 const AdminPage: React.FC = () => {
   const { t, language } = useLanguage();
@@ -19,6 +21,8 @@ const AdminPage: React.FC = () => {
   const [newPkg, setNewPkg] = useState({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0 });
   const [newNotice, setNewNotice] = useState({ titleBn: '', titleEn: '', contentBn: '', contentEn: '' });
   const [newShop, setNewShop] = useState({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, category: 'service', image: '', inStock: true });
+  const [uploadingShopImg, setUploadingShopImg] = useState(false);
+  const shopImgRef = useRef<HTMLInputElement>(null);
   const [newSvc, setNewSvc] = useState({ platform: 'facebook', serviceType: 'likes', nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, minQuantity: 100, maxQuantity: 10000, unit: 'likes' });
 
   if (!user || !isAdmin) return <Navigate to="/login" />;
@@ -35,6 +39,20 @@ const AdminPage: React.FC = () => {
   const handleAddPkg = async () => { if (!newPkg.nameEn) return; await addPackage({ ...newPkg, features: [], featuresBn: [] }); setNewPkg({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0 }); };
   const handleAddNotice = async () => { if (!newNotice.titleEn) return; await addNotice({ ...newNotice, date: new Date().toISOString(), important: false }); setNewNotice({ titleBn: '', titleEn: '', contentBn: '', contentEn: '' }); };
   const handleAddShop = async () => { if (!newShop.nameEn) return; await addShopItem(newShop); setNewShop({ nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, category: 'service', image: '', inStock: true }); };
+
+  const handleShopImageUpload = async (file: File) => {
+    if (!file || file.size > 5 * 1024 * 1024) { toast.error('File must be under 5MB'); return; }
+    if (!file.type.startsWith('image/')) { toast.error('Only images allowed'); return; }
+    setUploadingShopImg(true);
+    const ext = file.name.split('.').pop();
+    const filePath = `shop/${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('user-uploads').upload(filePath, file, { upsert: true });
+    if (error) { toast.error('Upload failed'); setUploadingShopImg(false); return; }
+    const { data: urlData } = supabase.storage.from('user-uploads').getPublicUrl(filePath);
+    setNewShop(prev => ({ ...prev, image: urlData.publicUrl }));
+    setUploadingShopImg(false);
+    toast.success(t('ছবি আপলোড হয়েছে', 'Image uploaded'));
+  };
   const handleAddSvc = async () => { if (!newSvc.nameEn) return; await addSocialService(newSvc); setNewSvc({ platform: 'facebook', serviceType: 'likes', nameBn: '', nameEn: '', descriptionBn: '', descriptionEn: '', price: 0, minQuantity: 100, maxQuantity: 10000, unit: 'likes' }); };
 
   const inputCls = "px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm";
@@ -90,12 +108,41 @@ const AdminPage: React.FC = () => {
                 <select value={newShop.category} onChange={e => setNewShop({ ...newShop, category: e.target.value })} className={inputCls}>
                   <option value="service">Service</option><option value="design">Design</option><option value="development">Development</option><option value="digital">Digital</option><option value="other">Other</option>
                 </select>
+                {/* Image Upload */}
+                <div className="sm:col-span-2">
+                  <div
+                    className="border-2 border-dashed border-border rounded-lg p-4 flex items-center gap-4 cursor-pointer hover:border-primary transition-colors"
+                    onClick={() => shopImgRef.current?.click()}
+                  >
+                    {newShop.image ? (
+                      <img src={newShop.image} alt="Preview" className="w-16 h-16 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                        <Image className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">{t('ছবি আপলোড করুন', 'Upload Image')}</p>
+                      <p className="text-xs text-muted-foreground">{t('সর্বোচ্চ ৫MB', 'Max 5MB')}</p>
+                    </div>
+                    {uploadingShopImg && <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />}
+                    <Upload className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <input ref={shopImgRef} type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleShopImageUpload(e.target.files[0])} />
+                </div>
                 <button onClick={handleAddShop} className="btn-3d gradient-primary text-primary-foreground py-2 text-sm flex items-center justify-center gap-1 sm:col-span-2"><Plus className="w-4 h-4" /> {t('যোগ', 'Add')}</button>
               </div>
             </div>
             {shopItems.map(item => (
               <div key={item.id} className="card-3d p-4 flex items-center justify-between">
-                <div><h4 className="font-semibold text-foreground">{language === 'bn' ? item.nameBn : item.nameEn}</h4><p className="text-sm text-muted-foreground">৳{item.price} • {item.category}</p></div>
+                <div className="flex items-center gap-3">
+                  {item.image ? (
+                    <img src={item.image} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"><ShoppingBag className="w-5 h-5 text-muted-foreground/40" /></div>
+                  )}
+                  <div><h4 className="font-semibold text-foreground">{language === 'bn' ? item.nameBn : item.nameEn}</h4><p className="text-sm text-muted-foreground">৳{item.price} • {item.category}</p></div>
+                </div>
                 <button onClick={() => deleteShopItem(item.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
