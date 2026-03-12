@@ -108,12 +108,41 @@ const AdminPage: React.FC = () => {
                 <select value={newShop.category} onChange={e => setNewShop({ ...newShop, category: e.target.value })} className={inputCls}>
                   <option value="service">Service</option><option value="design">Design</option><option value="development">Development</option><option value="digital">Digital</option><option value="other">Other</option>
                 </select>
+                {/* Image Upload */}
+                <div className="sm:col-span-2">
+                  <div
+                    className="border-2 border-dashed border-border rounded-lg p-4 flex items-center gap-4 cursor-pointer hover:border-primary transition-colors"
+                    onClick={() => shopImgRef.current?.click()}
+                  >
+                    {newShop.image ? (
+                      <img src={newShop.image} alt="Preview" className="w-16 h-16 rounded-lg object-cover" />
+                    ) : (
+                      <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                        <Image className="w-6 h-6 text-muted-foreground" />
+                      </div>
+                    )}
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-foreground">{t('ছবি আপলোড করুন', 'Upload Image')}</p>
+                      <p className="text-xs text-muted-foreground">{t('সর্বোচ্চ ৫MB', 'Max 5MB')}</p>
+                    </div>
+                    {uploadingShopImg && <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />}
+                    <Upload className="w-5 h-5 text-muted-foreground" />
+                  </div>
+                  <input ref={shopImgRef} type="file" accept="image/*" className="hidden" onChange={e => e.target.files?.[0] && handleShopImageUpload(e.target.files[0])} />
+                </div>
                 <button onClick={handleAddShop} className="btn-3d gradient-primary text-primary-foreground py-2 text-sm flex items-center justify-center gap-1 sm:col-span-2"><Plus className="w-4 h-4" /> {t('যোগ', 'Add')}</button>
               </div>
             </div>
             {shopItems.map(item => (
               <div key={item.id} className="card-3d p-4 flex items-center justify-between">
-                <div><h4 className="font-semibold text-foreground">{language === 'bn' ? item.nameBn : item.nameEn}</h4><p className="text-sm text-muted-foreground">৳{item.price} • {item.category}</p></div>
+                <div className="flex items-center gap-3">
+                  {item.image ? (
+                    <img src={item.image} alt="" className="w-10 h-10 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center"><ShoppingBag className="w-5 h-5 text-muted-foreground/40" /></div>
+                  )}
+                  <div><h4 className="font-semibold text-foreground">{language === 'bn' ? item.nameBn : item.nameEn}</h4><p className="text-sm text-muted-foreground">৳{item.price} • {item.category}</p></div>
+                </div>
                 <button onClick={() => deleteShopItem(item.id)} className="p-2 text-destructive hover:bg-destructive/10 rounded-lg"><Trash2 className="w-4 h-4" /></button>
               </div>
             ))}
