@@ -4,7 +4,9 @@ import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/Layout';
-import { ShoppingBag, Tag } from 'lucide-react';
+import { ShoppingBag, Tag, ChevronLeft, ChevronRight } from 'lucide-react';
+
+const ITEMS_PER_PAGE = 12;
 
 const ShopPage: React.FC = () => {
   const { t, language } = useLanguage();
@@ -15,6 +17,7 @@ const ShopPage: React.FC = () => {
   const [txMobile, setTxMobile] = useState('');
   const [method, setMethod] = useState('bkash');
   const [success, setSuccess] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const paymentNumbers: Record<string, string> = { bkash: '01688230246', nagad: '01303216921', rocket: '013032169215' };
 
@@ -33,6 +36,22 @@ const ShopPage: React.FC = () => {
   };
 
   const inStockItems = shopItems.filter(i => i.inStock);
+  const totalPages = Math.ceil(inStockItems.length / ITEMS_PER_PAGE);
+  const paginatedItems = inStockItems.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+  const getPageNumbers = () => {
+    const pages: (number | string)[] = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+      pages.push(1);
+      if (currentPage > 3) pages.push('...');
+      for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+      if (currentPage < totalPages - 2) pages.push('...');
+      pages.push(totalPages);
+    }
+    return pages;
+  };
 
   return (
     <Layout>
@@ -53,25 +72,30 @@ const ShopPage: React.FC = () => {
           </div>
         )}
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {inStockItems.map(item => (
-            <div key={item.id} className="card-3d p-5 flex flex-col">
-              <div className="w-full h-32 rounded-lg bg-muted flex items-center justify-center mb-4">
-                <ShoppingBag className="w-12 h-12 text-muted-foreground/30" />
+        {/* Grid: 2 cols mobile, 3 cols sm, 4 cols lg */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          {paginatedItems.map(item => (
+            <div key={item.id} className="card-3d p-3 flex flex-col">
+              <div className="w-full aspect-square rounded-lg bg-muted flex items-center justify-center mb-2 overflow-hidden">
+                {item.image ? (
+                  <img src={item.image} alt={language === 'bn' ? item.nameBn : item.nameEn} className="w-full h-full object-cover" />
+                ) : (
+                  <ShoppingBag className="w-8 h-8 text-muted-foreground/30" />
+                )}
               </div>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/10 text-primary self-start mb-2 capitalize">
-                <Tag className="w-3 h-3 inline mr-1" />{item.category}
+              <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary self-start mb-1 capitalize">
+                <Tag className="w-2.5 h-2.5 inline mr-0.5" />{item.category}
               </span>
-              <h3 className="text-lg font-bold text-foreground">{language === 'bn' ? item.nameBn : item.nameEn}</h3>
-              <p className="text-sm text-muted-foreground mt-1 flex-1">{language === 'bn' ? item.descriptionBn : item.descriptionEn}</p>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-2xl font-bold text-primary">৳{item.price}</span>
+              <h3 className="text-sm font-bold text-foreground line-clamp-2 leading-tight">{language === 'bn' ? item.nameBn : item.nameEn}</h3>
+              <p className="text-xs text-muted-foreground mt-1 flex-1 line-clamp-2">{language === 'bn' ? item.descriptionBn : item.descriptionEn}</p>
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-lg font-bold text-primary">৳{item.price}</span>
                 {user ? (
-                  <button onClick={() => setSelectedItem(item.id)} className="btn-3d gradient-primary text-primary-foreground px-4 py-2 text-sm">
+                  <button onClick={() => setSelectedItem(item.id)} className="btn-3d gradient-primary text-primary-foreground px-2.5 py-1.5 text-xs">
                     {t('কিনুন', 'Buy')}
                   </button>
                 ) : (
-                  <Link to="/login" className="btn-3d gradient-primary text-primary-foreground px-4 py-2 text-sm">
+                  <Link to="/login" className="btn-3d gradient-primary text-primary-foreground px-2.5 py-1.5 text-xs">
                     {t('লগইন', 'Login')}
                   </Link>
                 )}
@@ -82,6 +106,43 @@ const ShopPage: React.FC = () => {
             <p className="col-span-full text-center text-muted-foreground py-10">{t('কোনো আইটেম নেই', 'No items available')}</p>
           )}
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-center gap-1.5 mt-8">
+            <button
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg border border-border text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            {getPageNumbers().map((page, idx) =>
+              typeof page === 'string' ? (
+                <span key={`dots-${idx}`} className="px-2 text-muted-foreground text-sm">...</span>
+              ) : (
+                <button
+                  key={page}
+                  onClick={() => setCurrentPage(page)}
+                  className={`w-9 h-9 rounded-lg text-sm font-medium transition-all ${
+                    currentPage === page
+                      ? 'gradient-primary text-primary-foreground'
+                      : 'border border-border text-foreground hover:bg-muted'
+                  }`}
+                >
+                  {page}
+                </button>
+              )
+            )}
+            <button
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg border border-border text-foreground hover:bg-muted disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         {/* Payment Modal */}
         {selectedItem && user && (
