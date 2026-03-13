@@ -3,7 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Facebook, Youtube, MessageCircle, Instagram, Zap, Shield, Clock, Send, Mail, Phone, Globe, ShoppingBag } from 'lucide-react';
+import { ArrowRight, Facebook, Youtube, MessageCircle, Instagram, Zap, Shield, Clock, Send, Mail, Phone, Globe, ShoppingBag, Tag } from 'lucide-react';
 import Layout from '@/components/Layout';
 
 const HeroSection: React.FC = () => {
@@ -189,6 +189,7 @@ const ContactSection: React.FC = () => {
 const ShopPreview: React.FC = () => {
   const { t, language } = useLanguage();
   const { shopItems } = useData();
+  const { user } = useAuth();
 
   if (shopItems.length === 0) return null;
   const items = shopItems.filter(i => i.inStock).slice(0, 8);
@@ -212,9 +213,25 @@ const ShopPreview: React.FC = () => {
                   <ShoppingBag className="w-8 h-8 text-muted-foreground/30" />
                 )}
               </div>
+              {item.category && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary self-start mb-1 capitalize">
+                  <Tag className="w-2.5 h-2.5 inline mr-0.5" />{item.category}
+                </span>
+              )}
               <h3 className="text-sm font-bold text-foreground line-clamp-2 leading-tight">{language === 'bn' ? item.nameBn : item.nameEn}</h3>
               <p className="text-xs text-muted-foreground mt-1 flex-1 line-clamp-2">{language === 'bn' ? item.descriptionBn : item.descriptionEn}</p>
-              <p className="text-lg font-bold text-primary mt-2">৳{item.price}</p>
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-lg font-bold text-primary">৳{item.price}</span>
+                {user ? (
+                  <Link to="/shop" className="btn-3d gradient-primary text-primary-foreground px-2.5 py-1.5 text-xs">
+                    {t('কিনুন', 'Buy')}
+                  </Link>
+                ) : (
+                  <Link to="/login" className="btn-3d gradient-primary text-primary-foreground px-2.5 py-1.5 text-xs">
+                    {t('লগইন', 'Login')}
+                  </Link>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -231,7 +248,6 @@ const ShopPreview: React.FC = () => {
 const SocialServicesPreview: React.FC = () => {
   const { t, language } = useLanguage();
   const { socialServices } = useData();
-  const platforms = Array.from(new Set(socialServices.map(s => s.platform)));
 
   return (
     <section className="py-12 px-4 bg-muted/50">
