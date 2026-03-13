@@ -116,14 +116,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const register = async (email: string, username: string, password: string, fullName: string): Promise<boolean> => {
-    // Check if username is taken
-    const { data: existing } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('username', username)
-      .single();
-
-    if (existing) return false;
+    // Check if username is taken using RPC
+    const { data: existingEmail } = await supabase.rpc('get_email_by_username', { _username: username });
+    if (existingEmail) return false;
 
     const { error } = await supabase.auth.signUp({
       email,
