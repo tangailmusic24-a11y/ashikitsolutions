@@ -109,15 +109,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithUsername = async (username: string, password: string): Promise<boolean> => {
-    // Look up email by username
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('email')
-      .eq('username', username)
-      .single();
-
-    if (!profile) return false;
-    return login(profile.email, password);
+    // Use server-side RPC to look up email by username (avoids needing public profiles access)
+    const { data: email } = await supabase.rpc('get_email_by_username', { _username: username });
+    if (!email) return false;
+    return login(email, password);
   };
 
   const register = async (email: string, username: string, password: string, fullName: string): Promise<boolean> => {
