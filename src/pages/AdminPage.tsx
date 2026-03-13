@@ -45,10 +45,10 @@ const AdminPage: React.FC = () => {
     if (!file.type.startsWith('image/')) { toast.error('Only images allowed'); return; }
     setUploadingShopImg(true);
     const ext = file.name.split('.').pop();
-    const filePath = `shop/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('user-uploads').upload(filePath, file, { upsert: true });
+    const filePath = `${Date.now()}.${ext}`;
+    const { error } = await supabase.storage.from('shop-images').upload(filePath, file, { upsert: true });
     if (error) { toast.error('Upload failed'); setUploadingShopImg(false); return; }
-    const { data: urlData } = supabase.storage.from('user-uploads').getPublicUrl(filePath);
+    const { data: urlData } = supabase.storage.from('shop-images').getPublicUrl(filePath);
     setNewShop(prev => ({ ...prev, image: urlData.publicUrl }));
     setUploadingShopImg(false);
     toast.success(t('ছবি আপলোড হয়েছে', 'Image uploaded'));
