@@ -6,6 +6,7 @@ import Layout from '@/components/Layout';
 import { User, Mail, Phone, MapPin, CreditCard, Camera, Upload, Image } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useSignedUrl } from '@/hooks/useSignedUrl';
 
 const ProfilePage: React.FC = () => {
   const { t } = useLanguage();
