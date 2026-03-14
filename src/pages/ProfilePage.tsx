@@ -78,7 +78,7 @@ const ProfilePage: React.FC = () => {
           {/* Cover Picture */}
           <div className="h-36 relative group cursor-pointer" onClick={() => coverPicRef.current?.click()}>
             {user.coverPicture ? (
-              <img src={user.coverPicture} alt="Cover" className="w-full h-full object-cover" />
+              <img src={coverPicUrl} alt="Cover" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full gradient-hero" />
             )}
