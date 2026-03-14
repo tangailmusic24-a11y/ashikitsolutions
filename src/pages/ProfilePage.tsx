@@ -101,7 +101,7 @@ const ProfilePage: React.FC = () => {
             <div className="absolute -top-12 left-6">
               <div className="relative group cursor-pointer" onClick={() => profilePicRef.current?.click()}>
                 {user.profilePicture ? (
-                  <img src={user.profilePicture} alt="Profile" className="w-24 h-24 rounded-full object-cover border-4 border-card" />
+                  <img src={profilePicUrl} alt="Profile" className="w-24 h-24 rounded-full object-cover border-4 border-card" />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-primary border-4 border-card flex items-center justify-center text-primary-foreground text-3xl font-bold">
                     {(user.fullName || user.username).charAt(0).toUpperCase()}
