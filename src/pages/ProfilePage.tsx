@@ -196,7 +196,7 @@ const ProfilePage: React.FC = () => {
               >
                 {user.nidBack ? (
                   <>
-                    <img src={user.nidBack} alt="NID Back" className="w-full h-full object-cover" />
+                    <img src={nidBackUrl} alt="NID Back" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <Camera className="w-6 h-6 text-white" />
                     </div>
