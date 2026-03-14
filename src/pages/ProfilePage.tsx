@@ -48,11 +48,8 @@ const ProfilePage: React.FC = () => {
       return;
     }
 
-    // Use signed URL since bucket is now private
-    const { data: signedData } = await supabase.storage.from('user-uploads').createSignedUrl(filePath, 60 * 60 * 24 * 365); // 1 year
-    if (signedData?.signedUrl) {
-      await updateProfile({ [field]: signedData.signedUrl } as any);
-    }
+    // Store the storage path only (not a signed URL) for security
+    await updateProfile({ [field]: filePath } as any);
     toast.success(t('আপলোড সফল হয়েছে', 'Upload successful'));
     setUploading(null);
   };

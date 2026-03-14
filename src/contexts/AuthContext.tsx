@@ -84,7 +84,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (session?.user) {
-        // Use setTimeout to avoid Supabase deadlock
         setTimeout(() => fetchUserProfile(session.user), 0);
       } else {
         setUser(null);
@@ -109,16 +108,26 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const loginWithUsername = async (username: string, password: string): Promise<boolean> => {
-    // Use server-side RPC to look up email by username (avoids needing public profiles access)
-    const { data: email } = await supabase.rpc('get_email_by_username', { _username: username });
-    if (!email) return false;
-    return login(email, password);
+    // Use edge function to resolve email server-side (never exposed to client)
+    const { data, error } = await supabase.functions.invoke('login-by-username', {
+      body: { username, password },
+    });
+
+    if (error || !data?.session) return false;
+
+    // Set the session from the edge function response
+    const { error: sessionError } = await supabase.auth.setSession({
+      access_token: data.session.access_token,
+      refresh_token: data.session.refresh_token,
+    });
+
+    return !sessionError;
   };
 
   const register = async (email: string, username: string, password: string, fullName: string): Promise<boolean> => {
-    // Check if username is taken using RPC
-    const { data: existingEmail } = await supabase.rpc('get_email_by_username', { _username: username });
-    if (existingEmail) return false;
+    // Check if username is taken using boolean RPC (no email exposure)
+    const { data: exists } = await supabase.rpc('check_username_exists', { _username: username });
+    if (exists) return false;
 
     const { error } = await supabase.auth.signUp({
       email,
