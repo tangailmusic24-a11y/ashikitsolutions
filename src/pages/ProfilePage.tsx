@@ -6,6 +6,7 @@ import Layout from '@/components/Layout';
 import { User, Mail, Phone, MapPin, CreditCard, Camera, Upload, Image } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useSignedUrl } from '@/hooks/useSignedUrl';
 
 const ProfilePage: React.FC = () => {
   const { t } = useLanguage();
@@ -19,6 +20,12 @@ const ProfilePage: React.FC = () => {
   const nidBackRef = useRef<HTMLInputElement>(null);
 
   if (!user) return <Navigate to="/login" />;
+
+  // Resolve storage paths to short-lived signed URLs on render
+  const profilePicUrl = useSignedUrl('user-uploads', user.profilePicture);
+  const coverPicUrl = useSignedUrl('user-uploads', user.coverPicture);
+  const nidFrontUrl = useSignedUrl('user-uploads', user.nidFront);
+  const nidBackUrl = useSignedUrl('user-uploads', user.nidBack);
 
   const handleChange = async (field: string, value: string) => {
     setSaving(true);
@@ -48,11 +55,8 @@ const ProfilePage: React.FC = () => {
       return;
     }
 
-    // Use signed URL since bucket is now private
-    const { data: signedData } = await supabase.storage.from('user-uploads').createSignedUrl(filePath, 60 * 60 * 24 * 365); // 1 year
-    if (signedData?.signedUrl) {
-      await updateProfile({ [field]: signedData.signedUrl } as any);
-    }
+    // Store the storage path only (not a signed URL) for security
+    await updateProfile({ [field]: filePath } as any);
     toast.success(t('আপলোড সফল হয়েছে', 'Upload successful'));
     setUploading(null);
   };
@@ -74,7 +78,7 @@ const ProfilePage: React.FC = () => {
           {/* Cover Picture */}
           <div className="h-36 relative group cursor-pointer" onClick={() => coverPicRef.current?.click()}>
             {user.coverPicture ? (
-              <img src={user.coverPicture} alt="Cover" className="w-full h-full object-cover" />
+              <img src={coverPicUrl} alt="Cover" className="w-full h-full object-cover" />
             ) : (
               <div className="w-full h-full gradient-hero" />
             )}
@@ -97,7 +101,7 @@ const ProfilePage: React.FC = () => {
             <div className="absolute -top-12 left-6">
               <div className="relative group cursor-pointer" onClick={() => profilePicRef.current?.click()}>
                 {user.profilePicture ? (
-                  <img src={user.profilePicture} alt="Profile" className="w-24 h-24 rounded-full object-cover border-4 border-card" />
+                  <img src={profilePicUrl} alt="Profile" className="w-24 h-24 rounded-full object-cover border-4 border-card" />
                 ) : (
                   <div className="w-24 h-24 rounded-full bg-primary border-4 border-card flex items-center justify-center text-primary-foreground text-3xl font-bold">
                     {(user.fullName || user.username).charAt(0).toUpperCase()}
@@ -163,7 +167,7 @@ const ProfilePage: React.FC = () => {
               >
                 {user.nidFront ? (
                   <>
-                    <img src={user.nidFront} alt="NID Front" className="w-full h-full object-cover" />
+                    <img src={nidFrontUrl} alt="NID Front" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <Camera className="w-6 h-6 text-white" />
                     </div>
@@ -192,7 +196,7 @@ const ProfilePage: React.FC = () => {
               >
                 {user.nidBack ? (
                   <>
-                    <img src={user.nidBack} alt="NID Back" className="w-full h-full object-cover" />
+                    <img src={nidBackUrl} alt="NID Back" className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                       <Camera className="w-6 h-6 text-white" />
                     </div>
