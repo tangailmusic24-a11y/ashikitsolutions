@@ -21,6 +21,12 @@ const ProfilePage: React.FC = () => {
 
   if (!user) return <Navigate to="/login" />;
 
+  // Resolve storage paths to short-lived signed URLs on render
+  const profilePicUrl = useSignedUrl('user-uploads', user.profilePicture);
+  const coverPicUrl = useSignedUrl('user-uploads', user.coverPicture);
+  const nidFrontUrl = useSignedUrl('user-uploads', user.nidFront);
+  const nidBackUrl = useSignedUrl('user-uploads', user.nidBack);
+
   const handleChange = async (field: string, value: string) => {
     setSaving(true);
     await updateProfile({ [field]: value });
