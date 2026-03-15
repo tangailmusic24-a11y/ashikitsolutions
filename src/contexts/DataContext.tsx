@@ -134,21 +134,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [socialServices, setSocialServices] = useState<SocialService[]>([]);
+  const [siteSettings, setSiteSettings] = useState<SiteSetting[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const getSetting = useCallback((key: string, lang?: 'bn' | 'en') => {
+    const s = siteSettings.find(x => x.key === key);
+    if (!s) return '';
+    return lang === 'en' ? s.valueEn : s.valueBn;
+  }, [siteSettings]);
+
   const fetchAll = useCallback(async () => {
-    const [pkgRes, noticeRes, shopRes, svcRes, txRes] = await Promise.all([
+    const [pkgRes, noticeRes, shopRes, svcRes, txRes, settingsRes] = await Promise.all([
       supabase.from('packages').select('*').order('created_at'),
       supabase.from('notices').select('*').order('date', { ascending: false }),
       supabase.from('shop_items').select('*').order('created_at'),
       supabase.from('social_services').select('*').order('platform'),
       supabase.from('transactions').select('*').order('created_at', { ascending: false }),
+      supabase.from('site_settings').select('*').order('key'),
     ]);
     if (pkgRes.data) setPackages(pkgRes.data.map(mapPkg));
     if (noticeRes.data) setNotices(noticeRes.data.map(mapNotice));
     if (shopRes.data) setShopItems(shopRes.data.map(mapShop));
     if (svcRes.data) setSocialServices(svcRes.data.map(mapSvc));
     if (txRes.data) setTransactions(txRes.data.map(mapTx));
+    if (settingsRes.data) setSiteSettings(settingsRes.data.map(mapSetting));
     setLoading(false);
   }, []);
 
