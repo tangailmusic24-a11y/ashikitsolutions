@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useData } from '@/contexts/DataContext';
@@ -6,7 +6,7 @@ import { Navigate } from 'react-router-dom';
 import Layout from '@/components/Layout';
 import {
   Package as PkgIcon, Bell, Users, CreditCard, Plus, Trash2, Check, X,
-  ShoppingBag, Zap, Upload, Image, Edit2, EyeOff, Eye, Save, ChevronDown, ChevronUp
+  ShoppingBag, Zap, Upload, Image, Edit2, EyeOff, Eye, Save, ChevronDown, ChevronUp, Settings
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -15,11 +15,12 @@ const AdminPage: React.FC = () => {
   const { t, language } = useLanguage();
   const { user, isAdmin, allProfiles, refreshProfiles } = useAuth();
   const {
-    packages, notices, transactions, shopItems, socialServices,
+    packages, notices, transactions, shopItems, socialServices, siteSettings,
     addPackage, updatePackage, deletePackage,
     addNotice, updateNotice, deleteNotice,
     updateTransactionStatus, addShopItem, updateShopItem, deleteShopItem,
     addSocialService, updateSocialService, deleteSocialService,
+    updateSiteSetting,
   } = useData();
 
   const [tab, setTab] = useState('packages');
@@ -38,9 +39,19 @@ const AdminPage: React.FC = () => {
   const [editShop, setEditShop] = useState<any>({});
   const [editSvc, setEditSvc] = useState<any>({});
 
+  // Settings edit state
+  const [settingsEdits, setSettingsEdits] = useState<Record<string, { valueBn: string; valueEn: string }>>({});
+
   const [uploadingShopImg, setUploadingShopImg] = useState(false);
   const shopImgRef = useRef<HTMLInputElement>(null);
   const editShopImgRef = useRef<HTMLInputElement>(null);
+
+  // Initialize settings edits when siteSettings change
+  useEffect(() => {
+    const edits: Record<string, { valueBn: string; valueEn: string }> = {};
+    siteSettings.forEach(s => { edits[s.key] = { valueBn: s.valueBn, valueEn: s.valueEn }; });
+    setSettingsEdits(edits);
+  }, [siteSettings]);
 
   if (!user || !isAdmin) return <Navigate to="/login" />;
 
@@ -51,6 +62,7 @@ const AdminPage: React.FC = () => {
     { key: 'notices', icon: Bell, labelBn: 'নোটিশ', labelEn: 'Notices' },
     { key: 'transactions', icon: CreditCard, labelBn: 'পেমেন্ট', labelEn: 'Payments' },
     { key: 'users', icon: Users, labelBn: 'ইউজার', labelEn: 'Users' },
+    { key: 'settings', icon: Settings, labelBn: 'সেটিংস', labelEn: 'Settings' },
   ];
 
   const inputCls = "w-full px-3 py-2 rounded-lg bg-muted border border-border text-foreground text-sm focus:ring-2 focus:ring-primary outline-none";
@@ -141,12 +153,34 @@ const AdminPage: React.FC = () => {
     await updateNotice(id, { important: !current });
   };
 
+  const handleSaveSetting = async (key: string) => {
+    const edit = settingsEdits[key];
+    if (!edit) return;
+    await updateSiteSetting(key, edit.valueBn, edit.valueEn);
+    toast.success(t('সেটিং আপডেট হয়েছে', 'Setting updated'));
+  };
+
+  const settingLabels: Record<string, { bn: string; en: string }> = {
+    breaking_news: { bn: '🔴 ব্রেকিং নিউজ', en: '🔴 Breaking News' },
+    contact_telegram: { bn: 'টেলিগ্রাম', en: 'Telegram' },
+    contact_website: { bn: 'ওয়েবসাইট', en: 'Website' },
+    contact_facebook: { bn: 'ফেসবুক', en: 'Facebook' },
+    contact_instagram: { bn: 'ইনস্টাগ্রাম', en: 'Instagram' },
+    contact_email: { bn: 'ইমেইল', en: 'Email' },
+    contact_phone: { bn: 'মোবাইল', en: 'Mobile' },
+    contact_hours_bn: { bn: 'যোগাযোগের সময়', en: 'Contact Hours' },
+    hero_subtitle_bn: { bn: 'হিরো সাবটাইটেল', en: 'Hero Subtitle' },
+    hero_title_line1_bn: { bn: 'হিরো টাইটেল লাইন ১', en: 'Hero Title Line 1' },
+    hero_title_line2_bn: { bn: 'হিরো টাইটেল লাইন ২', en: 'Hero Title Line 2' },
+    hero_description_bn: { bn: 'হিরো বিবরণ', en: 'Hero Description' },
+  };
+
   return (
     <Layout>
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-6">
         <h1 className="text-xl sm:text-2xl font-bold text-foreground mb-4">🛡️ {t('এডমিন প্যানেল', 'Admin Panel')}</h1>
 
-        {/* Tabs - scrollable on mobile */}
+        {/* Tabs */}
         <div className="flex gap-1.5 mb-5 overflow-x-auto pb-2 -mx-3 px-3 sm:mx-0 sm:px-0">
           {tabs.map(tb => (
             <button key={tb.key} onClick={() => { setTab(tb.key); setEditingId(null); setExpandedAdd(false); if (tb.key === 'users') refreshProfiles(); }}
@@ -159,7 +193,6 @@ const AdminPage: React.FC = () => {
         {/* ============ PACKAGES ============ */}
         {tab === 'packages' && (
           <div className="space-y-3">
-            {/* Add toggle */}
             <button onClick={() => setExpandedAdd(!expandedAdd)} className="w-full card-3d p-3 flex items-center justify-between text-sm font-medium text-foreground">
               <span className="flex items-center gap-2"><Plus className="w-4 h-4 text-primary" /> {t('নতুন প্যাকেজ যোগ', 'Add New Package')}</span>
               {expandedAdd ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
@@ -457,6 +490,42 @@ const AdminPage: React.FC = () => {
                 {u.mobile && <p className="text-[10px] text-muted-foreground">{u.mobile}</p>}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* ============ SETTINGS ============ */}
+        {tab === 'settings' && (
+          <div className="space-y-3">
+            <p className="text-sm text-muted-foreground mb-2">{t('হোম পেজ, যোগাযোগ ও ব্রেকিং নিউজ সেটিংস পরিবর্তন করুন', 'Edit homepage, contact & breaking news settings')}</p>
+            {Object.entries(settingsEdits).map(([key, val]) => {
+              const label = settingLabels[key] || { bn: key, en: key };
+              return (
+                <div key={key} className="card-3d p-3 sm:p-4 space-y-2">
+                  <h4 className="font-semibold text-foreground text-sm">{language === 'bn' ? label.bn : label.en}</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[10px] text-muted-foreground mb-1 block">বাংলা</label>
+                      {key.includes('description') || key === 'breaking_news' ? (
+                        <textarea value={val.valueBn} onChange={e => setSettingsEdits(prev => ({ ...prev, [key]: { ...prev[key], valueBn: e.target.value } }))} className={inputCls} rows={2} />
+                      ) : (
+                        <input value={val.valueBn} onChange={e => setSettingsEdits(prev => ({ ...prev, [key]: { ...prev[key], valueBn: e.target.value } }))} className={inputCls} />
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-[10px] text-muted-foreground mb-1 block">English</label>
+                      {key.includes('description') || key === 'breaking_news' ? (
+                        <textarea value={val.valueEn} onChange={e => setSettingsEdits(prev => ({ ...prev, [key]: { ...prev[key], valueEn: e.target.value } }))} className={inputCls} rows={2} />
+                      ) : (
+                        <input value={val.valueEn} onChange={e => setSettingsEdits(prev => ({ ...prev, [key]: { ...prev[key], valueEn: e.target.value } }))} className={inputCls} />
+                      )}
+                    </div>
+                  </div>
+                  <button onClick={() => handleSaveSetting(key)} className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs">
+                    <Save className="w-3.5 h-3.5" /> {t('সেভ', 'Save')}
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
