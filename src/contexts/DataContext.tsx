@@ -63,12 +63,21 @@ export interface SocialService {
   unit: string;
 }
 
+export interface SiteSetting {
+  id: string;
+  key: string;
+  valueBn: string;
+  valueEn: string;
+}
+
 interface DataContextType {
   packages: Package[];
   notices: Notice[];
   transactions: Transaction[];
   shopItems: ShopItem[];
   socialServices: SocialService[];
+  siteSettings: SiteSetting[];
+  getSetting: (key: string, lang?: 'bn' | 'en') => string;
   addPackage: (pkg: Omit<Package, 'id'>) => Promise<void>;
   updatePackage: (id: string, pkg: Partial<Package>) => Promise<void>;
   deletePackage: (id: string) => Promise<void>;
@@ -83,6 +92,7 @@ interface DataContextType {
   addSocialService: (svc: Omit<SocialService, 'id'>) => Promise<void>;
   updateSocialService: (id: string, svc: Partial<SocialService>) => Promise<void>;
   deleteSocialService: (id: string) => Promise<void>;
+  updateSiteSetting: (key: string, valueBn: string, valueEn: string) => Promise<void>;
   loading: boolean;
 }
 
