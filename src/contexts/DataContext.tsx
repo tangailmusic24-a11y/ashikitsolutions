@@ -283,14 +283,28 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSocialServices(s => s.filter(x => x.id !== id));
   };
 
+  // Site Settings
+  const updateSiteSetting = async (key: string, valueBn: string, valueEn: string) => {
+    const existing = siteSettings.find(s => s.key === key);
+    if (existing) {
+      await supabase.from('site_settings').update({ value_bn: valueBn, value_en: valueEn }).eq('key', key);
+      setSiteSettings(s => s.map(x => x.key === key ? { ...x, valueBn, valueEn } : x));
+    } else {
+      const { data } = await supabase.from('site_settings').insert({ key, value_bn: valueBn, value_en: valueEn }).select().single();
+      if (data) setSiteSettings(s => [...s, mapSetting(data)]);
+    }
+  };
+
   return (
     <DataContext.Provider value={{
-      packages, notices, transactions, shopItems, socialServices, loading,
+      packages, notices, transactions, shopItems, socialServices, siteSettings, loading,
+      getSetting,
       addPackage, updatePackage, deletePackage,
       addNotice, updateNotice, deleteNotice,
       addTransaction, updateTransactionStatus,
       addShopItem, updateShopItem, deleteShopItem,
       addSocialService, updateSocialService, deleteSocialService,
+      updateSiteSetting,
     }}>
       {children}
     </DataContext.Provider>
