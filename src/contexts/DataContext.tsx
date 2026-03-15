@@ -124,6 +124,9 @@ const mapSvc = (r: any): SocialService => ({
   nameEn: r.name_en, descriptionBn: r.description_bn, descriptionEn: r.description_en,
   price: r.price, minQuantity: r.min_quantity, maxQuantity: r.max_quantity, unit: r.unit || '',
 });
+const mapSetting = (r: any): SiteSetting => ({
+  id: r.id, key: r.key, valueBn: r.value_bn, valueEn: r.value_en,
+});
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [packages, setPackages] = useState<Package[]>([]);
