@@ -3,11 +3,39 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useData } from '@/contexts/DataContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Facebook, Youtube, MessageCircle, Instagram, Zap, Shield, Clock, Send, Mail, Phone, Globe, ShoppingBag, Tag } from 'lucide-react';
+import { ArrowRight, Facebook, Youtube, MessageCircle, Instagram, Zap, Shield, Clock, Send, Mail, Phone, Globe, ShoppingBag, Tag, Megaphone } from 'lucide-react';
 import Layout from '@/components/Layout';
 
+const BreakingNews: React.FC = () => {
+  const { language } = useLanguage();
+  const { getSetting } = useData();
+  const text = getSetting('breaking_news', language);
+  if (!text) return null;
+
+  return (
+    <div className="bg-destructive/90 text-destructive-foreground py-2 overflow-hidden">
+      <div className="flex items-center gap-3 max-w-6xl mx-auto px-4">
+        <span className="shrink-0 flex items-center gap-1 text-xs font-bold bg-destructive-foreground/20 px-2 py-0.5 rounded">
+          <Megaphone className="w-3.5 h-3.5" /> LIVE
+        </span>
+        <div className="overflow-hidden flex-1">
+          <div className="animate-marquee whitespace-nowrap text-sm font-medium">
+            {text} &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; {text} &nbsp;&nbsp;&nbsp;•&nbsp;&nbsp;&nbsp; {text}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const HeroSection: React.FC = () => {
-  const { t } = useLanguage();
+  const { language } = useLanguage();
+  const { getSetting } = useData();
+  const subtitle = getSetting('hero_subtitle_bn', language);
+  const line1 = getSetting('hero_title_line1_bn', language);
+  const line2 = getSetting('hero_title_line2_bn', language);
+  const desc = getSetting('hero_description_bn', language);
+
   return (
     <section className="relative overflow-hidden gradient-hero text-primary-foreground py-16 px-4">
       <div className="absolute inset-0 opacity-10">
@@ -17,25 +45,22 @@ const HeroSection: React.FC = () => {
       <div className="relative max-w-4xl mx-auto text-center space-y-6">
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary-foreground/10 backdrop-blur-sm text-sm">
           <Zap className="w-4 h-4 text-accent" />
-          {t('বিশ্বস্ততার এক ধাপ এগিয়ে', 'One step ahead in trust')}
+          {subtitle || (language === 'bn' ? 'বিশ্বস্ততার এক ধাপ এগিয়ে' : 'One step ahead in trust')}
         </div>
         <h1 className="text-3xl sm:text-5xl font-bold leading-tight">
-          {t('সোশ্যাল মিডিয়ার সকল সমস্যার', 'Complete Solutions for All')}
+          {line1 || (language === 'bn' ? 'সোশ্যাল মিডিয়ার সকল সমস্যার' : 'Complete Solutions for All')}
           <br />
-          <span className="text-secondary">{t('সম্পূর্ণ সমাধান', 'Social Media Issues')}</span>
+          <span className="text-secondary">{line2 || (language === 'bn' ? 'সম্পূর্ণ সমাধান' : 'Social Media Issues')}</span>
         </h1>
         <p className="text-lg text-primary-foreground/80 max-w-2xl mx-auto">
-          {t(
-            'ফেসবুক, ইউটিউব, টিকটক, ইনস্টাগ্রাম, টেলিগ্রাম সহ সকল প্ল্যাটফর্মের মনিটাইজেশন সেটআপ ও সমস্যা সমাধান',
-            'Monetization setup & problem solving for Facebook, YouTube, TikTok, Instagram, Telegram and all platforms'
-          )}
+          {desc || (language === 'bn' ? 'ফেসবুক, ইউটিউব, টিকটক, ইনস্টাগ্রাম, টেলিগ্রাম সহ সকল প্ল্যাটফর্মের মনিটাইজেশন সেটআপ ও সমস্যা সমাধান' : 'Monetization setup & problem solving for all platforms')}
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link to="/packages" className="btn-3d gradient-primary px-8 py-3 text-primary-foreground inline-flex items-center justify-center gap-2">
-            {t('প্যাকেজ দেখুন', 'View Packages')} <ArrowRight className="w-4 h-4" />
+            {language === 'bn' ? 'প্যাকেজ দেখুন' : 'View Packages'} <ArrowRight className="w-4 h-4" />
           </Link>
           <Link to="/tools" className="btn-3d bg-primary-foreground/10 backdrop-blur-sm border border-primary-foreground/20 px-8 py-3 text-primary-foreground inline-flex items-center justify-center gap-2">
-            {t('ফ্রি টুলস', 'Free Tools')}
+            {language === 'bn' ? 'ফ্রি টুলস' : 'Free Tools'}
           </Link>
         </div>
         <div className="flex justify-center gap-6 pt-4">
@@ -151,23 +176,25 @@ const FeaturesSection: React.FC = () => {
 };
 
 const ContactSection: React.FC = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+  const { getSetting } = useData();
+
   const contacts = [
-    { icon: Send, label: 'Telegram', value: '@mdashikahmed_official', url: 'https://t.me/mdashikahmed_official' },
-    { icon: Globe, label: t('ওয়েবসাইট', 'Website'), value: 'ashik360info.blogspot.com', url: 'https://ashik360info.blogspot.com' },
-    { icon: Facebook, label: 'Facebook', value: 'mdashikahmed02', url: 'https://facebook.com/mdashikahmed02' },
-    { icon: Instagram, label: 'Instagram', value: 'mdashikahmed02', url: 'https://instagram.com/mdashikahmed02' },
-    { icon: Mail, label: t('ইমেইল', 'Email'), value: 'ashik.oysterit@gmail.com', url: 'mailto:ashik.oysterit@gmail.com' },
-    { icon: Phone, label: t('মোবাইল', 'Mobile'), value: '+8801303216921', url: 'https://wa.me/8801303216921' },
+    { icon: Send, label: 'Telegram', value: getSetting('contact_telegram', language) || '@mdashikahmed_official', url: `https://t.me/${(getSetting('contact_telegram', language) || '@mdashikahmed_official').replace('@', '')}` },
+    { icon: Globe, label: t('ওয়েবসাইট', 'Website'), value: getSetting('contact_website', language) || 'ashik360info.blogspot.com', url: `https://${getSetting('contact_website', language) || 'ashik360info.blogspot.com'}` },
+    { icon: Facebook, label: 'Facebook', value: getSetting('contact_facebook', language) || 'mdashikahmed02', url: `https://facebook.com/${getSetting('contact_facebook', language) || 'mdashikahmed02'}` },
+    { icon: Instagram, label: 'Instagram', value: getSetting('contact_instagram', language) || 'mdashikahmed02', url: `https://instagram.com/${getSetting('contact_instagram', language) || 'mdashikahmed02'}` },
+    { icon: Mail, label: t('ইমেইল', 'Email'), value: getSetting('contact_email', language) || 'ashik.oysterit@gmail.com', url: `mailto:${getSetting('contact_email', language) || 'ashik.oysterit@gmail.com'}` },
+    { icon: Phone, label: t('মোবাইল', 'Mobile'), value: getSetting('contact_phone', language) || '+8801303216921', url: `https://wa.me/${(getSetting('contact_phone', language) || '+8801303216921').replace('+', '')}` },
   ];
+
+  const hours = getSetting('contact_hours_bn', language) || t('সকাল ১১টা থেকে রাত ৮টা পর্যন্ত শুধুমাত্র হোয়াটসঅ্যাপে', 'WhatsApp only, 11 AM to 8 PM');
 
   return (
     <section className="py-12 px-4 bg-muted/50">
       <div className="max-w-4xl mx-auto">
         <h2 className="text-2xl font-bold text-foreground mb-2 text-center">{t('যোগাযোগ করুন', 'Contact Us')}</h2>
-        <p className="text-sm text-muted-foreground text-center mb-8">
-          {t('সকাল ১১টা থেকে রাত ৮টা পর্যন্ত শুধুমাত্র হোয়াটসঅ্যাপে', 'WhatsApp only, 11 AM to 8 PM')}
-        </p>
+        <p className="text-sm text-muted-foreground text-center mb-8">{hours}</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {contacts.map((c, i) => (
             <a key={i} href={c.url} target="_blank" rel="noopener noreferrer" className="card-3d p-4 flex items-center gap-3 hover:border-primary/50">
@@ -282,6 +309,7 @@ const SocialServicesPreview: React.FC = () => {
 const HomePage: React.FC = () => {
   return (
     <Layout>
+      <BreakingNews />
       <HeroSection />
       <NoticeBoard />
       <ShopPreview />

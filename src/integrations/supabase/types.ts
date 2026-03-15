@@ -185,6 +185,33 @@ export type Database = {
         }
         Relationships: []
       }
+      site_settings: {
+        Row: {
+          created_at: string
+          id: string
+          key: string
+          updated_at: string
+          value_bn: string
+          value_en: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          key: string
+          updated_at?: string
+          value_bn?: string
+          value_en?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          key?: string
+          updated_at?: string
+          value_bn?: string
+          value_en?: string
+        }
+        Relationships: []
+      }
       social_services: {
         Row: {
           created_at: string

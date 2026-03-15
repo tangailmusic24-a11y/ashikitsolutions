@@ -63,12 +63,21 @@ export interface SocialService {
   unit: string;
 }
 
+export interface SiteSetting {
+  id: string;
+  key: string;
+  valueBn: string;
+  valueEn: string;
+}
+
 interface DataContextType {
   packages: Package[];
   notices: Notice[];
   transactions: Transaction[];
   shopItems: ShopItem[];
   socialServices: SocialService[];
+  siteSettings: SiteSetting[];
+  getSetting: (key: string, lang?: 'bn' | 'en') => string;
   addPackage: (pkg: Omit<Package, 'id'>) => Promise<void>;
   updatePackage: (id: string, pkg: Partial<Package>) => Promise<void>;
   deletePackage: (id: string) => Promise<void>;
@@ -83,6 +92,7 @@ interface DataContextType {
   addSocialService: (svc: Omit<SocialService, 'id'>) => Promise<void>;
   updateSocialService: (id: string, svc: Partial<SocialService>) => Promise<void>;
   deleteSocialService: (id: string) => Promise<void>;
+  updateSiteSetting: (key: string, valueBn: string, valueEn: string) => Promise<void>;
   loading: boolean;
 }
 
@@ -114,6 +124,9 @@ const mapSvc = (r: any): SocialService => ({
   nameEn: r.name_en, descriptionBn: r.description_bn, descriptionEn: r.description_en,
   price: r.price, minQuantity: r.min_quantity, maxQuantity: r.max_quantity, unit: r.unit || '',
 });
+const mapSetting = (r: any): SiteSetting => ({
+  id: r.id, key: r.key, valueBn: r.value_bn, valueEn: r.value_en,
+});
 
 export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [packages, setPackages] = useState<Package[]>([]);
@@ -121,21 +134,30 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [socialServices, setSocialServices] = useState<SocialService[]>([]);
+  const [siteSettings, setSiteSettings] = useState<SiteSetting[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const getSetting = useCallback((key: string, lang?: 'bn' | 'en') => {
+    const s = siteSettings.find(x => x.key === key);
+    if (!s) return '';
+    return lang === 'en' ? s.valueEn : s.valueBn;
+  }, [siteSettings]);
+
   const fetchAll = useCallback(async () => {
-    const [pkgRes, noticeRes, shopRes, svcRes, txRes] = await Promise.all([
+    const [pkgRes, noticeRes, shopRes, svcRes, txRes, settingsRes] = await Promise.all([
       supabase.from('packages').select('*').order('created_at'),
       supabase.from('notices').select('*').order('date', { ascending: false }),
       supabase.from('shop_items').select('*').order('created_at'),
       supabase.from('social_services').select('*').order('platform'),
       supabase.from('transactions').select('*').order('created_at', { ascending: false }),
+      supabase.from('site_settings').select('*').order('key'),
     ]);
     if (pkgRes.data) setPackages(pkgRes.data.map(mapPkg));
     if (noticeRes.data) setNotices(noticeRes.data.map(mapNotice));
     if (shopRes.data) setShopItems(shopRes.data.map(mapShop));
     if (svcRes.data) setSocialServices(svcRes.data.map(mapSvc));
     if (txRes.data) setTransactions(txRes.data.map(mapTx));
+    if (settingsRes.data) setSiteSettings(settingsRes.data.map(mapSetting));
     setLoading(false);
   }, []);
 
@@ -261,14 +283,28 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setSocialServices(s => s.filter(x => x.id !== id));
   };
 
+  // Site Settings
+  const updateSiteSetting = async (key: string, valueBn: string, valueEn: string) => {
+    const existing = siteSettings.find(s => s.key === key);
+    if (existing) {
+      await supabase.from('site_settings').update({ value_bn: valueBn, value_en: valueEn }).eq('key', key);
+      setSiteSettings(s => s.map(x => x.key === key ? { ...x, valueBn, valueEn } : x));
+    } else {
+      const { data } = await supabase.from('site_settings').insert({ key, value_bn: valueBn, value_en: valueEn }).select().single();
+      if (data) setSiteSettings(s => [...s, mapSetting(data)]);
+    }
+  };
+
   return (
     <DataContext.Provider value={{
-      packages, notices, transactions, shopItems, socialServices, loading,
+      packages, notices, transactions, shopItems, socialServices, siteSettings, loading,
+      getSetting,
       addPackage, updatePackage, deletePackage,
       addNotice, updateNotice, deleteNotice,
       addTransaction, updateTransactionStatus,
       addShopItem, updateShopItem, deleteShopItem,
       addSocialService, updateSocialService, deleteSocialService,
+      updateSiteSetting,
     }}>
       {children}
     </DataContext.Provider>
