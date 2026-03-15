@@ -35,7 +35,7 @@ Deno.serve(async (req) => {
         "Authorization": `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [
           { role: "system", content: "You are a helpful AI assistant. Respond in the same language as the user's input. Be concise and useful." },
           { role: "user", content: prompt },
