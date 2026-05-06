@@ -1,0 +1,1 @@
+GRANT EXECUTE ON FUNCTION public.check_username_exists(text) TO anon, authenticated;
