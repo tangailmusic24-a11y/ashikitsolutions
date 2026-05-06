@@ -329,6 +329,34 @@ export type Database = {
     }
     Functions: {
       check_username_exists: { Args: { _username: string }; Returns: boolean }
+      create_transaction: {
+        Args: {
+          _method: string
+          _mobile: string
+          _package_id: string
+          _transaction_id: string
+        }
+        Returns: {
+          amount: number
+          created_at: string
+          id: string
+          method: string
+          mobile: string
+          package_id: string
+          package_name: string
+          status: string
+          transaction_id: string
+          updated_at: string
+          user_id: string
+          user_name: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "transactions"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       get_email_by_username: { Args: { _username: string }; Returns: string }
       has_role: {
         Args: {
