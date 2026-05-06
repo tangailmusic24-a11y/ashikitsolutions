@@ -215,12 +215,14 @@ export const DataProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   // Transactions
   const addTransaction = async (tx: Omit<Transaction, 'id' | 'status' | 'date'>) => {
-    const { data } = await supabase.from('transactions').insert({
-      user_id: tx.userId, user_name: tx.userName, package_id: tx.packageId,
-      package_name: tx.packageName, amount: tx.amount, method: tx.method,
-      transaction_id: tx.transactionId, mobile: tx.mobile, status: 'pending',
-    }).select().single();
-    if (data) setTransactions(t => [mapTx(data), ...t]);
+    // Server-side RPC validates price against packages/shop_items; client cannot forge amount.
+    const { data } = await supabase.rpc('create_transaction', {
+      _package_id: tx.packageId,
+      _method: tx.method,
+      _transaction_id: tx.transactionId,
+      _mobile: tx.mobile,
+    });
+    if (data) setTransactions(t => [mapTx(data as any), ...t]);
   };
   const updateTransactionStatus = async (id: string, status: Transaction['status']) => {
     await supabase.from('transactions').update({ status }).eq('id', id);
